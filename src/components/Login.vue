@@ -30,12 +30,25 @@ export default {
   methods: {
     doLogin() {
       var _this = this;
-      this.postRequest
-        ("/login", {
-          'username': _this.username,
-          'password': _this.password
-        })
-        .then(resp => {});
+      this.postRequest("/login", {
+        username: _this.username,
+        password: _this.password
+      }).then(resp => {
+
+        if (resp && resp.data.state == 1) {
+          this.$message({
+            message: "恭喜你，登录成功!",
+            type: "success"
+          });
+
+          this.$router.push({path:'/home'})
+          
+        }else{
+           this.$message.error('登录失败，请核实用户名或密码是否错误');
+        }
+
+
+      });
     }
   }
 };
