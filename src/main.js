@@ -16,6 +16,8 @@ Vue.use(ElementUI);
 
 import { postRequest } from '../src/api/index'
 import { getRequest } from '../src/api/index'
+import { uploadFileRequest } from '../src/api/index'
+import { putRequest } from '../src/api/index'
 
 //mavonEditor
 import mavonEditor from 'mavon-editor'
@@ -23,8 +25,10 @@ import 'mavon-editor/dist/css/index.css'
 // use
 Vue.use(mavonEditor)
 
+Vue.prototype.putRequest = putRequest;
 Vue.prototype.getRequest = getRequest;
 Vue.prototype.postRequest = postRequest;
+Vue.prototype.uploadFileRequest = uploadFileRequest;
 
 //全局时间过滤器
 Vue.filter('dateFormat', function (value,pattern="YYYY-MM-DD HH:mm:ss") {

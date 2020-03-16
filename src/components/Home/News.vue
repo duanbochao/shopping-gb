@@ -65,7 +65,6 @@
             list-type="picture-card"
             :on-preview="handlePictureCardPreview"
             :on-remove="handleRemove"
-            :on-success="success"
           >
             <i class="el-icon-plus"></i>
           </el-upload>
@@ -90,12 +89,18 @@
 
         <span>文章内容:</span>
         <div id="editor">
-          <mavon-editor style="height: 100%;width: 100%;" v-model="newslistOne.content"></mavon-editor>
+          <mavon-editor
+            style="height: 100%;width: 100%;"
+            ref="md"
+            @imgAdd="imgAdd"
+            @imgDel="imgDel"
+            v-model="newslistOne.content"
+          ></mavon-editor>
         </div>
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="updateNewsList">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -128,9 +133,58 @@ export default {
     this.loadNewsList();
   },
   methods: {
-    success() {
-      console.log("good success");
+    updateNewsList() {
+      var _this = this;
+      this.dialogVisible = false;
+
+      this.newslistOne.createDate = this.timestampToTime(
+        this.newslistOne.createDate
+      );
+      this.postRequest("/home/news/updateNews", _this.newslistOne).then(
+        resp => {
+          if (resp.status == 200) {
+            this.$message({
+              message: "恭喜你，修改成功!",
+              type: "success"
+            });
+          }
+        }
+      );
     },
+
+    timestampToTime(cjsj) {
+      //格式化时间
+      var date = new Date(cjsj);
+      var Y = date.getFullYear() + "-";
+      var M =
+        (date.getMonth() + 1 < 10
+          ? "0" + (date.getMonth() + 1)
+          : date.getMonth() + 1) + "-";
+      var D = date.getDate() + " ";
+      var h = date.getHours() + ":";
+      var m = date.getMinutes() + ":";
+      var s = date.getSeconds();
+      return Y + M + D + h + m + s;
+    },
+
+    imgAdd(pos, $file) {
+      //图片上传
+      var _this = this;
+      // 第一步.将图片上传到服务器.
+      var formdata = new FormData();
+      formdata.append("image", $file);
+      this.uploadFileRequest("/config/uploadimg", formdata).then(resp => {
+        var json = resp.data.message;
+        if (resp.status == 200) {
+          //  _this.$refs.md.$imgUpdateByUrl(pos, json.msg)
+          _this.$refs.md.$imglst2Url([[pos, json]]);
+        } else {
+          _this.$message({ type: json.status, message: json });
+        }
+      });
+    },
+    imgDel(pos) {},
+
     handleRemove(file, fileList) {
       console.log(file, fileList);
     },
@@ -153,8 +207,7 @@ export default {
 
     handleEdit(index, row) {
       //修改
-      //  row.createDate=new Date(row.createDate);
-
+      row.createDate = new Date(row.createDate);
       this.newslistOne = row;
       this.dialogVisible = true;
     },

@@ -25,6 +25,9 @@ Vue.prototype.axios = axios
 
 ```
 
+## 完成新闻资讯显示
++ 新闻资讯编译显示
+
 
 
 
