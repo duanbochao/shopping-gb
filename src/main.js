@@ -17,6 +17,12 @@ Vue.use(ElementUI);
 import { postRequest } from '../src/api/index'
 import { getRequest } from '../src/api/index'
 
+//mavonEditor
+import mavonEditor from 'mavon-editor'
+import 'mavon-editor/dist/css/index.css'
+// use
+Vue.use(mavonEditor)
+
 Vue.prototype.getRequest = getRequest;
 Vue.prototype.postRequest = postRequest;
 

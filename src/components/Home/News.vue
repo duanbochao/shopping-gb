@@ -21,7 +21,7 @@
         <template slot-scope="scope">{{scope.row.createDate | dateFormat}}</template>
       </el-table-column>
       <el-table-column align="right">
-        <template slot="header" slot-scope="scope">
+        <template slot="header">
           <div class="search">
             <el-input v-model="keywords" size="mini" placeholder="输入关键字搜索" />
             <el-button
@@ -38,6 +38,7 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页组件区域 -->
     <el-pagination
       style="text-align:right;margin-top:10px;"
       background
@@ -47,6 +48,56 @@
       :total="totalCount"
       @current-change="handleCurrentChange"
     ></el-pagination>
+
+    <!-- 对话框区域 -->
+    <el-dialog
+      title="修改"
+      :visible.sync="dialogVisible"
+      width="60%"
+      :before-close="handleClose"
+      style="text-align:left"
+    >
+      <div>
+        <div>
+          <span>上传头像</span>
+          <el-upload
+            action="https://jsonplaceholder.typicode.com/posts/"
+            list-type="picture-card"
+            :on-preview="handlePictureCardPreview"
+            :on-remove="handleRemove"
+            :on-success="success"
+          >
+            <i class="el-icon-plus"></i>
+          </el-upload>
+        </div>
+        <p>
+          <span>文章标题</span>
+          <el-input size="mini" v-model="newslistOne.title" maxlength="24" />
+        </p>
+        <p>
+          <span>点击次数:</span>
+          <el-input size="mini" v-model="newslistOne.count" />
+        </p>
+        <div class="block">
+          <span>发表时间:</span>
+          <el-date-picker
+            v-model="newslistOne.createDate"
+            size="mini"
+            type="datetime"
+            placeholder="选择日期时间"
+          ></el-date-picker>
+        </div>
+
+        <span>文章内容:</span>
+        <div id="editor">
+          <mavon-editor style="height: 100%;width: 100%;" v-model="newslistOne.content"></mavon-editor>
+        </div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -59,13 +110,41 @@ export default {
       keywords: "",
       size: 5,
       search: "",
-      newsList: []
+      dialogImageUrl: "",
+      dialogVisible: false,
+      newsList: [],
+      newslistOne: {
+        id: 0,
+        title: "",
+        createDate: "",
+        count: "",
+        content: "",
+        newsIcon: "",
+        summary: ""
+      }
     };
   },
   created() {
     this.loadNewsList();
   },
   methods: {
+    success() {
+      console.log("good success");
+    },
+    handleRemove(file, fileList) {
+      console.log(file, fileList);
+    },
+    handlePictureCardPreview(file) {
+      console.log(file.url);
+    },
+    handleClose(done) {
+      this.$confirm("确认关闭？")
+        .then(_ => {
+          done();
+        })
+        .catch(_ => {});
+    },
+
     handleCurrentChange(val) {
       //分页查询
       this.page = val;
@@ -73,7 +152,11 @@ export default {
     },
 
     handleEdit(index, row) {
-      console.log(index, row);
+      //修改
+      //  row.createDate=new Date(row.createDate);
+
+      this.newslistOne = row;
+      this.dialogVisible = true;
     },
     handleDelete(index, row) {
       console.log(index, row);
@@ -109,5 +192,9 @@ export default {
 
 .search {
   display: flex;
+}
+
+.el-input--mini {
+  width: 400px;
 }
 </style>
