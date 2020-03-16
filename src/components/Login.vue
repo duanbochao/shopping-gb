@@ -41,6 +41,8 @@ export default {
             type: "success"
           });
 
+          window.localStorage.setItem("user",JSON.stringify(resp.data.message))
+          
           this.$router.push({path:'/home'})
           
         }else{
