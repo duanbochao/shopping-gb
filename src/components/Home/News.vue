@@ -58,24 +58,34 @@
       style="text-align:left"
     >
       <div>
-        <div>
+        <div class="newIcon">
           <span>上传头像</span>
-          <el-upload
-            action="https://jsonplaceholder.typicode.com/posts/"
-            list-type="picture-card"
-            :on-preview="handlePictureCardPreview"
-            :on-remove="handleRemove"
-          >
+          <img
+            :src="newslistOne.newsIcon"
+            alt
+            style="width:60px;height:60px; margin-left:10px;margin-right:20px;border-radius: 50%"
+          />
+          <div class="uploadImg">
+                      <el-upload action="/config/uploadimg"
+                      :on-success="uploadSuccess"
+                      :show-file-list=false
+                      >
             <i class="el-icon-plus"></i>
           </el-upload>
+          </div>
         </div>
         <p>
           <span>文章标题</span>
-          <el-input size="mini" v-model="newslistOne.title" maxlength="24" />
+          <el-input
+            size="mini"
+            v-model="newslistOne.title"
+            maxlength="18"
+            placeholder="最多输入18个字..."
+          />
         </p>
         <p>
           <span>点击次数:</span>
-          <el-input size="mini" v-model="newslistOne.count" />
+          <el-input-number size="mini" v-model="newslistOne.count"></el-input-number>
         </p>
         <div class="block">
           <span>发表时间:</span>
@@ -125,7 +135,8 @@ export default {
         count: "",
         content: "",
         newsIcon: "",
-        summary: ""
+        summary: "",
+        contentHtml: ""
       }
     };
   },
@@ -133,6 +144,12 @@ export default {
     this.loadNewsList();
   },
   methods: {
+    uploadSuccess(response){
+    if (response.state==200) {
+      this.newslistOne.newsIcon=response.message;
+    }
+      
+    },
     updateNewsList() {
       var _this = this;
       this.dialogVisible = false;
@@ -140,6 +157,9 @@ export default {
       this.newslistOne.createDate = this.timestampToTime(
         this.newslistOne.createDate
       );
+
+      this.newslistOne.contentHtml = this.$refs.md.d_render;
+
       this.postRequest("/home/news/updateNews", _this.newslistOne).then(
         resp => {
           if (resp.status == 200) {
@@ -172,7 +192,7 @@ export default {
       var _this = this;
       // 第一步.将图片上传到服务器.
       var formdata = new FormData();
-      formdata.append("image", $file);
+      formdata.append("file", $file);
       this.uploadFileRequest("/config/uploadimg", formdata).then(resp => {
         var json = resp.data.message;
         if (resp.status == 200) {
@@ -250,4 +270,11 @@ export default {
 .el-input--mini {
   width: 400px;
 }
+.newIcon {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+
 </style>
