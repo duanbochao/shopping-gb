@@ -10,50 +10,69 @@
     >
       <el-table-column type="selection" width="55px"></el-table-column>
       <el-table-column label="编号" prop="id" width="60px"></el-table-column>
-      <el-table-column label="图标" width="100px">
+      <el-table-column label="图标" width="90px">
         <template slot-scope="scope">
           <img style="width:50px;height:50px" :src="scope.row.newsIcon" />
         </template>
       </el-table-column>
-      <el-table-column label="标题" prop="title" width="220px"></el-table-column>
+      <el-table-column label="标题" prop="title" width="200px"></el-table-column>
 
       <el-table-column label="发表时间">
         <template slot-scope="scope">{{scope.row.createDate | dateFormat}}</template>
       </el-table-column>
       <el-table-column label="点击次数" prop="count" width="80px"></el-table-column>
-      <el-table-column label="评论次数" prop="count" width="80px">
+      <el-table-column label="评论次数" width="80px">
         <template slot-scope="scope">
-          <a href="#" @click.prevent="updateComment(scope.$index, scope.row)">{{scope.row.commentCount}}</a>
+          <a
+            href="#"
+            @click.prevent="updateComment(scope.$index, scope.row)"
+          >{{scope.row.commentCount}}</a>
         </template>
       </el-table-column>
       <el-table-column align="right">
         <template slot="header">
           <div class="search">
-            <el-input v-model="keywords" size="mini" placeholder="输入关键字搜索" />
+            <el-input v-model="keywords" size="mini" placeholder="请输入标题搜索" />
             <el-button
+              icon="el-icon-search"
               type="primary"
-              style="margin-left:5px"
+              style="margin-left:3px"
               size="mini"
               @click="loadNewsListByKeyworlds()"
-            >查询</el-button>
+            ></el-button>
           </div>
         </template>
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">修改</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          <el-button
+            size="mini"
+            class="el-icon-edit"
+            @click="handleEdit(scope.$index, scope.row)"
+          >修改</el-button>
+          <el-button
+            size="mini"
+            class="el-icon-delete"
+            type="danger"
+            @click="handleDelete(scope.$index, scope.row)"
+          >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
     <!-- 分页组件区域 -->
-    <el-pagination
-      style="text-align:right;margin-top:10px;"
-      background
-      :page-size="5"
-      :current-page.sync="currentPage"
-      layout=" prev, pager, next,total, jumper"
-      :total="totalCount"
-      @current-change="handleCurrentChange"
-    ></el-pagination>
+    <div class="news_bottom_box">
+      <div>
+        <el-button type="danger" disabled size="mini">批量删除</el-button>
+        <el-button type="primary" icon="el-icon-plus" size="mini" @click="clearnNewsListStyle()">添加</el-button>
+      </div>
+      <el-pagination
+        style="text-align:right;margin-top:10px;"
+        background
+        :page-size="5"
+        :current-page.sync="currentPage"
+        layout=" prev, pager, next,total, jumper"
+        :total="totalCount"
+        @current-change="handleCurrentChange"
+      ></el-pagination>
+    </div>
 
     <!-- 对话框区域 -->
     <el-dialog
@@ -67,7 +86,7 @@
         <div class="newIcon">
           <span>上传头像</span>
           <img
-            :src="newslistOne.newsIcon"
+            :src="newslistOne.newsIcon==null ? 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3895940275,3954737772&fm=26&gp=0.jpg' : newslistOne.newsIcon"
             alt
             style="width:60px;height:60px; margin-left:10px;margin-right:20px;border-radius: 50%"
           />
@@ -116,8 +135,8 @@
         </div>
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="updateNewsList">确 定</el-button>
+        <el-button @click="dialogVisible = false" size="mini">取 消</el-button>
+        <el-button type="primary" @click="submitNewsList" size="mini">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -179,15 +198,50 @@ export default {
   },
   methods: {
 
-    commentDialogClose(){ //弹出框关闭后清空缓存数据
-      this.commentData=null;
+    submitNewsList(){ //提交表单数据信息
+        if (this.newslistOne.id===0) {
+          this.addNews();
+        }else{
+          this.updateNewsList();
+        }
+
+    },
+    addNews() {
+      this.postRequest("/home/news/addNewsList",this.newslistOne).then(resp=>{
+        if (resp && resp.data.state==1) {
+           this.$message({
+              message: resp.data.message,
+              type: "success"
+            });
+            this.dialogVisible=false;
+        }
+      })
+    },
+
+    clearnNewsListStyle() {
+      this.dialogVisible = true;
+      //格式化NewsListStyle
+      this.newslistOne = {
+        id: 0,
+        title: "",
+        createDate: "",
+        count: "",
+        content: "",
+        newsIcon: "",
+        summary: "",
+        contentHtml: ""
+      };
+    },
+    commentDialogClose() {
+      //弹出框关闭后清空缓存数据
+      this.commentData = null;
     },
     nextUp() {
       this.getComment();
     },
-    
+
     nextDown() {
-       this.getComment();
+      this.getComment();
     },
 
     updateComment(index, row) {
@@ -213,8 +267,8 @@ export default {
           } else {
             this.flag = true;
           }
-        }else{
-          this.$message("数据已经到底啦!")
+        } else {
+          this.$message("数据已经到底啦!");
           this.flag = false;
         }
       });
@@ -223,9 +277,15 @@ export default {
     uploadSuccess(response) {
       //图片上传方法
       if (response.state == 200) {
+        console.log("hello world");
+
         this.newslistOne.newsIcon = response.message;
       }
     },
+    
+
+
+
     updateNewsList() {
       //更新
       var _this = this;
@@ -351,5 +411,12 @@ export default {
   display: flex;
   justify-content: flex-start;
   align-items: center;
+}
+
+.news_bottom_box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
 }
 </style>
