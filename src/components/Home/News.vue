@@ -9,16 +9,22 @@
       style="width: 100%;height:380px;"
     >
       <el-table-column type="selection" width="55px"></el-table-column>
-      <el-table-column label="编号" prop="id" width="70px"></el-table-column>
+      <el-table-column label="编号" prop="id" width="60px"></el-table-column>
       <el-table-column label="图标" width="100px">
         <template slot-scope="scope">
           <img style="width:50px;height:50px" :src="scope.row.newsIcon" />
         </template>
       </el-table-column>
-      <el-table-column label="标题" prop="title" width="260px"></el-table-column>
-      <el-table-column label="点击次数" prop="count" width="80px"></el-table-column>
+      <el-table-column label="标题" prop="title" width="220px"></el-table-column>
+
       <el-table-column label="发表时间">
         <template slot-scope="scope">{{scope.row.createDate | dateFormat}}</template>
+      </el-table-column>
+      <el-table-column label="点击次数" prop="count" width="80px"></el-table-column>
+      <el-table-column label="评论次数" prop="count" width="80px">
+        <template slot-scope="scope">
+          <a href="#" @click.prevent="updateComment(scope.$index, scope.row)">{{scope.row.commentCount}}</a>
+        </template>
       </el-table-column>
       <el-table-column align="right">
         <template slot="header">
@@ -33,8 +39,8 @@
           </div>
         </template>
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
+          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">修改</el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -66,12 +72,13 @@
             style="width:60px;height:60px; margin-left:10px;margin-right:20px;border-radius: 50%"
           />
           <div class="uploadImg">
-                      <el-upload action="/config/uploadimg"
-                      :on-success="uploadSuccess"
-                      :show-file-list=false
-                      >
-            <i class="el-icon-plus"></i>
-          </el-upload>
+            <el-upload
+              action="/config/uploadimg"
+              :on-success="uploadSuccess"
+              :show-file-list="false"
+            >
+              <i class="el-icon-plus"></i>
+            </el-upload>
           </div>
         </div>
         <p>
@@ -113,6 +120,28 @@
         <el-button type="primary" @click="updateNewsList">确 定</el-button>
       </span>
     </el-dialog>
+
+    <!-- 评论对话框 -->
+    <div>
+      <el-dialog title="评论详情" :visible.sync="dialogTableVisible" @close="commentDialogClose">
+        <el-table :data="commentData" size="mini">
+          <el-table-column property="id" label="id" width="50"></el-table-column>
+          <el-table-column label="评论用户">
+            <template
+              slot-scope="scope"
+            >{{ (scope.row.username===null || scope.row.username==='') ? '匿名用户' : scope.row.username}}</template>
+          </el-table-column>
+          <el-table-column property="commentContent" label="评论内容"></el-table-column>
+          <el-table-column label="评论时间">
+            <template slot-scope="scope">{{scope.row.creteDate | dateFormat}}</template>
+          </el-table-column>
+        </el-table>
+        <div style="text-align:right;margin-top:5px">
+          <el-button size="mini" @click="nextUp(--index)" v-show="index<=1 ? false:true">上一页</el-button>
+          <el-button size="mini" @click="nextDown(++index)" v-show="flag? true:false">下一页</el-button>
+        </div>
+      </el-dialog>
+    </div>
   </div>
 </template>
 <script>
@@ -121,9 +150,12 @@ export default {
     return {
       totalCount: -1,
       page: 1,
+      index: 1,
+      flag: true,
       currentPage: 1,
       keywords: "",
       size: 5,
+      nid: -1,
       search: "",
       dialogImageUrl: "",
       dialogVisible: false,
@@ -137,20 +169,65 @@ export default {
         newsIcon: "",
         summary: "",
         contentHtml: ""
-      }
+      },
+      commentData: [],
+      dialogTableVisible: false
     };
   },
   created() {
     this.loadNewsList();
   },
   methods: {
-    uploadSuccess(response){
-    if (response.state==200) {
-      this.newslistOne.newsIcon=response.message;
-    }
-      
+
+    commentDialogClose(){ //弹出框关闭后清空缓存数据
+      this.commentData=null;
+    },
+    nextUp() {
+      this.getComment();
+    },
+    
+    nextDown() {
+       this.getComment();
+    },
+
+    updateComment(index, row) {
+      this.nid = row.id;
+      this.getComment();
+      this.dialogTableVisible = true;
+    },
+
+    getComment() {
+      var _this = this;
+      //更新评论内容
+      this.dialogTableVisible = true;
+      var _this = this;
+      this.postRequest("/home/comment/web/getCommentByPage", {
+        page: _this.index,
+        nid: _this.nid,
+        commetType: "0"
+      }).then(resp => {
+        if (resp.data.state == "1") {
+          this.commentData = resp.data.message;
+          if (this.commentData.length < 5) {
+            this.flag = false;
+          } else {
+            this.flag = true;
+          }
+        }else{
+          this.$message("数据已经到底啦!")
+          this.flag = false;
+        }
+      });
+    },
+
+    uploadSuccess(response) {
+      //图片上传方法
+      if (response.state == 200) {
+        this.newslistOne.newsIcon = response.message;
+      }
     },
     updateNewsList() {
+      //更新
       var _this = this;
       this.dialogVisible = false;
 
@@ -158,8 +235,8 @@ export default {
         this.newslistOne.createDate
       );
 
+      //获取编译器中的html信息
       this.newslistOne.contentHtml = this.$refs.md.d_render;
-
       this.postRequest("/home/news/updateNews", _this.newslistOne).then(
         resp => {
           if (resp.status == 200) {
@@ -275,6 +352,4 @@ export default {
   justify-content: flex-start;
   align-items: center;
 }
-
-
 </style>
