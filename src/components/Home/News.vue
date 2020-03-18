@@ -273,12 +273,9 @@ export default {
         }
       });
     },
-
+    //图片上传方法
     uploadSuccess(response) {
-      //图片上传方法
       if (response.state == 200) {
-        console.log("hello world");
-
         this.newslistOne.newsIcon = response.message;
       }
     },
