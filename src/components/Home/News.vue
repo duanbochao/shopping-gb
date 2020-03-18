@@ -39,7 +39,7 @@
               style="margin-left:3px"
               size="mini"
               @click="loadNewsListByKeyworlds()"
-            ></el-button>
+            >查询</el-button>
           </div>
         </template>
         <template slot-scope="scope">
