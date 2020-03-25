@@ -24,6 +24,13 @@
         size="mini"
         @click="searchShare()"
       >查询</el-button>
+      <el-button
+        icon="el-icon-plus"
+        type="primary"
+        style="margin-left:3px"
+        size="mini"
+        @click="prveAddShare()"
+      >添加</el-button>
     </div>
     <!-- 表格区域 -->
     <el-table :data="shareList" style="width: 100%;height:100%">
@@ -77,14 +84,25 @@
             <el-input v-model="share.title" size="mini" style="width:200px"></el-input>
           </span>
         </p>
-        <div class="img_box">
+        <div class="img_box" v-show="this.share.url=='' ?false:true">
           <span>封面图片</span>
           <img style="width:50px;height:50px;border-radius: 50%" :src="share.url" />
         </div>
 
+        <div v-show="this.share.url==''? true: false">
+  
+          <span>选择类型</span>
+          <el-select v-model="dialogtype" size="mini" placeholder="请选择">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            ></el-option>
+          </el-select>
+        </div>
         <div class="img_box">
           <span>封面详情图</span>
-
           <img
             @click="deleteImg(item)"
             v-for="(item,index) in imgDetails"
@@ -134,7 +152,7 @@
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false" size="mini">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false" size="mini">确 定</el-button>
+        <el-button type="primary" size="mini" @click="submit">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -150,7 +168,8 @@ export default {
       search: "",
       dialogVisible: false,
       imgDetails: [],
-      detailsType:'',
+      detailsType: "",
+      dialogtype:0,
       shareImgDetails: {
         id: 0,
         surl: "",
@@ -163,7 +182,6 @@ export default {
         content: "",
         createDate: "",
         type: "",
-        enabled: "",
         count: ""
       },
       options: [
@@ -205,6 +223,47 @@ export default {
     this.loadList();
   },
   methods: {
+    timestampToTime(cjsj) {
+      //格式化时间
+      var date = new Date(cjsj);
+      var Y = date.getFullYear() + "-";
+      var M =
+        (date.getMonth() + 1 < 10
+          ? "0" + (date.getMonth() + 1)
+          : date.getMonth() + 1) + "-";
+      var D = date.getDate() + " ";
+      var h = date.getHours() + ":";
+      var m = date.getMinutes() + ":";
+      var s = date.getSeconds();
+      return Y + M + D + h + m + s;
+    },
+    submit() {
+      //提交表单
+      this.dialogVisible = false;
+
+      this.share.createDate = new Date(this.share.createDate);
+      this.share.createDate = this.timestampToTime(this.share.createDate);
+      this.share.type = this.dialogtype;
+      this.addShare();
+    },
+
+    prveAddShare() {
+      this.formateShare();
+      this.imgDetails = null;
+      this.dialogVisible = true;
+    },
+    //添加操作
+    addShare() {
+      console.log(this.share);
+
+      var _this = this;
+      this.postRequest("/home/share/addShare", this.share).then(resp => {
+        if (resp && resp.status == 200) {
+          this.$message("添加成功!");
+        }
+      });
+    },
+
     //上传失败后
     uploadError(err, file, fileList) {
       console.log(err, file, fileList);
@@ -216,25 +275,18 @@ export default {
         this.postRequest("/home/share/addShareSubImageToDetail", {
           surl: response.message,
           sid: _this.shareId,
-          type:_this.detailsType
+          type: _this.detailsType
         })
           .then(resp => {
             if (resp && resp.status === 200) {
-              console.log();
-              
               _this.$message({
                 message: "恭喜你，图片上传成功",
                 type: "success"
               });
-              console.log("==========", _this.imgDetails);
-              
-             _this.imgDetails.push(resp.data.message);
-              
+              _this.imgDetails.push(resp.data.message);
             }
           })
-          .catch(resp => {
-
-          });
+          .catch(resp => {});
       }
     },
     //删除图片
@@ -258,8 +310,7 @@ export default {
 
     //修改操作
     handleEdit(index, row) {
-      this.detailsType=row.type;
-      
+      this.detailsType = row.type;
       this.shareId = row.id; //保存这个id供图片上传成功后插入操作
       this.share = row;
       this.dialogVisible = true;
@@ -298,6 +349,18 @@ export default {
           _this.total = resp.data.total;
         }
       });
+    },
+
+    formateShare() {
+      this.share = {
+        id: 0,
+        url: "",
+        title: "",
+        content: "",
+        createDate: "",
+        type: "",
+        count: ""
+      };
     },
     //加载图片详情列表
     loadListDetail(sid) {

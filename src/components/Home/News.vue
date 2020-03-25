@@ -207,6 +207,8 @@ export default {
 
     },
     addNews() {
+      console.log(this.newslistOne);
+      
       this.postRequest("/home/news/addNewsList",this.newslistOne).then(resp=>{
         if (resp && resp.data.state==1) {
            this.$message({

@@ -4,6 +4,8 @@ import Login from '@/components/Login'
 import Home from '@/components/Home'
 import News from '@/components/Home/News'
 import Share from '@/components/Home/Share'
+import Systemmanager from '@/components/System/Systemmanager'
+
 Vue.use(Router)
 
 export default new Router({
@@ -30,6 +32,11 @@ export default new Router({
             path:'/home/share',
             name:"图片分享",
             component:Share
+          },
+          {
+            path:'/home/sysmanager',
+            name:"操作管理员",
+            component:Systemmanager
           }
       ]
     }

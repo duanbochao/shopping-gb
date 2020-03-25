@@ -31,9 +31,9 @@
     <el-container>
       <el-aside width="200px">
         <el-menu default-active="2" class="el-menu-vertical-demo" unique-opened router>
-          <el-submenu :index="index+''" v-for="(item,index) in dataList" :key="index">
+          <el-submenu :index="index+''" v-for="(item,index) in dataList" :key="index" style="color:#d3dce6">
             <template slot="title">
-              <i class="el-icon-location"></i>
+              <i :class="item.iconCls"></i>
               <span>{{item.name}}</span>
             </template>
             <el-menu-item :index="chi.path" v-for="(chi,i) in item.children" :key="i">{{chi.name}}</el-menu-item>
@@ -101,6 +101,10 @@ export default {
   display: flex;
   justify-content: space-around;
   align-items: center;
+}
+
+.el-submenu {
+    background-color: #d3dce6;
 }
 </style>
 

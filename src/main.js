@@ -48,7 +48,7 @@ router.beforeEach((to, from, next) => {
   
   if (name === '未登录') {
     if (to.meta.requireAuth || to.name == null) {
-      next({path: '/', query: {redirect: to.path}})
+      next();
     } else {
       next();
     }
