@@ -33,7 +33,11 @@
       >添加</el-button>
     </div>
     <!-- 表格区域 -->
-    <el-table :data="shareList" style="width: 100%;height:100%">
+    <el-table
+      :data="shareList"
+      style="width: 100%;height:380px"
+      @selection-change="handleSelectionChange"
+    >
       <el-table-column type="selection" width="55px"></el-table-column>
       <el-table-column label="编号" prop="id" width="60px"></el-table-column>
       <el-table-column label="图标" width="120px">
@@ -57,14 +61,21 @@
       </el-table-column>-->
       <el-table-column align="right">
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">Edit</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">Delete</el-button>
+          <el-button size="mini" class="el-icon-edit"  @click="handleEdit(scope.$index, scope.row)">修改</el-button>
+          <el-button size="mini" type="danger"    class="el-icon-delete"  @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <!-- 分页组件 -->
-    <div style="margin-top:10px;text-align:right">
+    <div class="share_bottom">
+      <el-button
+        type="danger"
+        size="mini"
+        :disabled="multipleSelection.length==0"
+        @click="handleMany()"
+      >批量删除</el-button>
+      
       <el-pagination
         :page-sizes="[5, 10, 15, 20]"
         @size-change="handleSizeChange"
@@ -90,7 +101,6 @@
         </div>
 
         <div v-show="this.share.url==''? true: false">
-  
           <span>选择类型</span>
           <el-select v-model="dialogtype" size="mini" placeholder="请选择">
             <el-option
@@ -166,11 +176,12 @@ export default {
       keywords: "",
       total: 0,
       search: "",
+      multipleSelection: [],
       dialogVisible: false,
       imgDetails: [],
       detailsType: "",
-      dialogtype:0,
-      imageContainer:'',
+      dialogtype: 0,
+      imageContainer: "",
       shareImgDetails: {
         id: 0,
         surl: "",
@@ -224,6 +235,40 @@ export default {
     this.loadList();
   },
   methods: {
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
+
+    handleDelete(id, row) {
+      //删除一个
+      this.doDelete(row.id);
+    },
+    handleMany() {
+      //批量删除
+      var ids = "";
+      this.multipleSelection.forEach(item => {
+        ids = ids + item.id + ",";
+      });
+
+      this.doDelete(ids);
+    },
+
+    doDelete(ids) {
+      var _this = this;
+      this.postRequest("/home/share/deleteShareByIds", {
+        ids: ids
+      }).then(resp => {
+        if (resp && resp.status == 200) {
+          _this.$message({
+            message: "删除成功",
+            type: "success"
+          });
+
+          _this.loadList();
+        }
+      });
+    },
+
     timestampToTime(cjsj) {
       //格式化时间
       var date = new Date(cjsj);
@@ -244,8 +289,8 @@ export default {
       this.share.createDate = new Date(this.share.createDate);
       this.share.createDate = this.timestampToTime(this.share.createDate);
       this.share.type = this.dialogtype;
-      
-     this.share.url=this.imageContainer.surl;
+
+      this.share.url = this.imageContainer.surl;
 
       this.addShare();
     },
@@ -257,11 +302,14 @@ export default {
     },
     //添加操作
     addShare() {
-    
       var _this = this;
       this.postRequest("/home/share/addShare", this.share).then(resp => {
         if (resp && resp.status == 200) {
-          this.$message("添加成功!");
+          _this.$message({
+            message: "添加成功!",
+            type: "success"
+          });
+          _this.loadList();
         }
       });
     },
@@ -277,7 +325,7 @@ export default {
         this.postRequest("/home/share/addShareSubImageToDetail", {
           surl: response.message,
           sid: _this.shareId,
-          type: _this.dialogtype+''
+          type: _this.dialogtype + ""
         })
           .then(resp => {
             if (resp && resp.status === 200) {
@@ -285,10 +333,9 @@ export default {
                 message: "恭喜你，图片上传成功",
                 type: "success"
               });
-              _this.imageContainer=resp.data.message;
+              _this.imageContainer = resp.data.message;
               _this.imgDetails.push(resp.data.message);
               console.log(" _this.imgDetails======", _this.imgDetails);
-              
             }
           })
           .catch(resp => {});
@@ -309,7 +356,6 @@ export default {
         }
 
         _this.imgDetails = _this.imgDetails.filter(item => item.id !== row.id);
-
       });
     },
 
@@ -334,7 +380,7 @@ export default {
 
     searchShare() {
       //关键词查询
-  
+
       this.search = "";
       this.loadList();
     },
@@ -348,7 +394,6 @@ export default {
         type: _this.type
       }).then(resp => {
         if (resp && resp.status == 200) {
-
           _this.shareList = resp.data.shareList;
           _this.total = resp.data.total;
         }
@@ -402,5 +447,14 @@ export default {
   width: 50px;
   height: 50px;
   background-color: #85bff8;
+}
+
+.share_bottom {
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 5px;
+  
 }
 </style>
