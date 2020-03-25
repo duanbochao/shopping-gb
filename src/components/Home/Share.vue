@@ -170,6 +170,7 @@ export default {
       imgDetails: [],
       detailsType: "",
       dialogtype:0,
+      imageContainer:'',
       shareImgDetails: {
         id: 0,
         surl: "",
@@ -187,31 +188,31 @@ export default {
       options: [
         {
           value: "0",
-          label: "获取全部"
+          label: "全部商品"
         },
         {
           value: "1",
-          label: "清纯美女"
+          label: "最新上架"
         },
         {
           value: "2",
-          label: "极品诱惑"
+          label: "江南特产"
         },
         {
           value: "3",
-          label: "大胸长腿"
+          label: "皖北风韵"
         },
         {
           value: "4",
-          label: "国产自拍"
+          label: "新疆干货"
         },
         {
           value: "5",
-          label: "高清无码"
+          label: "砀山酥梨"
         },
         {
           value: "6",
-          label: "高清有码"
+          label: "进口水果"
         }
       ],
       type: "",
@@ -240,22 +241,23 @@ export default {
     submit() {
       //提交表单
       this.dialogVisible = false;
-
       this.share.createDate = new Date(this.share.createDate);
       this.share.createDate = this.timestampToTime(this.share.createDate);
       this.share.type = this.dialogtype;
+      
+     this.share.url=this.imageContainer.surl;
+
       this.addShare();
     },
 
     prveAddShare() {
       this.formateShare();
-      this.imgDetails = null;
+      this.imgDetails = [];
       this.dialogVisible = true;
     },
     //添加操作
     addShare() {
-      console.log(this.share);
-
+    
       var _this = this;
       this.postRequest("/home/share/addShare", this.share).then(resp => {
         if (resp && resp.status == 200) {
@@ -275,7 +277,7 @@ export default {
         this.postRequest("/home/share/addShareSubImageToDetail", {
           surl: response.message,
           sid: _this.shareId,
-          type: _this.detailsType
+          type: _this.dialogtype+''
         })
           .then(resp => {
             if (resp && resp.status === 200) {
@@ -283,7 +285,10 @@ export default {
                 message: "恭喜你，图片上传成功",
                 type: "success"
               });
+              _this.imageContainer=resp.data.message;
               _this.imgDetails.push(resp.data.message);
+              console.log(" _this.imgDetails======", _this.imgDetails);
+              
             }
           })
           .catch(resp => {});
@@ -292,7 +297,7 @@ export default {
     //删除图片
     deleteImg(row) {
       var _this = this;
-      console.log("you click me", row.id);
+
       this.postRequest("/home/share/deleteDetailsById", {
         sid: row.id
       }).then(resp => {
@@ -304,7 +309,7 @@ export default {
         }
 
         _this.imgDetails = _this.imgDetails.filter(item => item.id !== row.id);
-        console.log(_this.imgDetails);
+
       });
     },
 
@@ -329,7 +334,7 @@ export default {
 
     searchShare() {
       //关键词查询
-      console.log(this.value);
+  
       this.search = "";
       this.loadList();
     },
@@ -343,7 +348,6 @@ export default {
         type: _this.type
       }).then(resp => {
         if (resp && resp.status == 200) {
-          console.log(resp);
 
           _this.shareList = resp.data.shareList;
           _this.total = resp.data.total;

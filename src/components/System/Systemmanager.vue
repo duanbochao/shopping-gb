@@ -45,8 +45,8 @@
                 v-model="item.enabled"
                 active-color="#13ce66"
                 inactive-color="#ff4949"
-                active-text="禁用"
-                inactive-text="启用"
+                active-text="启用"
+                inactive-text="禁用"
                 @change="updateStatus(item)"
               ></el-switch>
             </div>

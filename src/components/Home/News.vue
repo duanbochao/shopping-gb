@@ -221,11 +221,12 @@ export default {
       this.postRequest("/home/news/addNewsList", this.newslistOne).then(
         resp => {
           if (resp && resp.data.state == 1) {
-            this.$message({
+            _this.$message({
               message: resp.data.message,
               type: "success"
             });
             this.dialogVisible = false;
+            _this.loadNewsList();
           }
         }
       );
@@ -310,10 +311,12 @@ export default {
       this.postRequest("/home/news/updateNews", _this.newslistOne).then(
         resp => {
           if (resp.status == 200) {
-            this.$message({
+            _this.$message({
               message: "恭喜你，修改成功!",
               type: "success"
             });
+
+            _this.loadNewsList();
           }
         }
       );
@@ -397,7 +400,7 @@ export default {
     },
 
     doDelete(ids) {
-      var _this=this;
+      var _this = this;
       this.postRequest("/home/news/deleteNewsById", {
         ids: ids
       }).then(resp => {
@@ -406,7 +409,7 @@ export default {
             message: "恭喜删除成功!",
             type: "success"
           });
-           _this.loadNewsList();
+          _this.loadNewsList();
         }
       });
     },

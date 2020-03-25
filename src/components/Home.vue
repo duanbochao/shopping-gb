@@ -8,7 +8,7 @@
           <div>
             <el-dropdown>
               <span class="el-dropdown-link" style="color:white">
-                <span>管理员</span>
+                <span>{{user.name}}</span>
                 <i class="el-icon-arrow-down el-icon--right"></i>
               </span>
               <el-dropdown-menu slot="dropdown">
@@ -21,7 +21,7 @@
           <div style="margin-left:5px">
             <img
               style="width:45px;height:45px;  border-radius: 50%"
-              src="https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=3497512293,2132791044&fm=26&gp=0.jpg"
+              :src="user.userface"
               alt
             />
           </div>
@@ -67,6 +67,11 @@ export default {
       this.getRequest("/config/getMenusById").then(resp => {
         this.dataList = resp.data;
       });
+    }
+  },
+  computed:{
+    user(){
+      return this.$store.state.user;
     }
   }
 };
