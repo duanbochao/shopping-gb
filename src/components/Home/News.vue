@@ -3,10 +3,11 @@
     <!-- 表格区域 -->
     <el-table
       fit
-      max-height="390px"
+      max-height="400px"
       size="mini"
-      :data="newsList.filter(data => !search || data.name.toLowerCase().includes(search.toLowerCase()))"
+      :data="newsList"
       style="width: 100%;height:380px;"
+      @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55px"></el-table-column>
       <el-table-column label="编号" prop="id" width="60px"></el-table-column>
@@ -60,7 +61,12 @@
     <!-- 分页组件区域 -->
     <div class="news_bottom_box">
       <div>
-        <el-button type="danger" disabled size="mini">批量删除</el-button>
+        <el-button
+          type="danger"
+          :disabled="multipleSelection.length==0"
+          size="mini"
+          @click="handleDeleteMany()"
+        >批量删除</el-button>
         <el-button type="primary" icon="el-icon-plus" size="mini" @click="clearnNewsListStyle()">添加</el-button>
       </div>
       <el-pagination
@@ -167,6 +173,8 @@
 export default {
   data() {
     return {
+      disabled: true,
+      multipleSelection: [],
       totalCount: -1,
       page: 1,
       index: 1,
@@ -197,27 +205,30 @@ export default {
     this.loadNewsList();
   },
   methods: {
-
-    submitNewsList(){ //提交表单数据信息
-        if (this.newslistOne.id===0) {
-          this.addNews();
-        }else{
-          this.updateNewsList();
-        }
-
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
+    submitNewsList() {
+      //提交表单数据信息
+      if (this.newslistOne.id === 0) {
+        this.addNews();
+      } else {
+        this.updateNewsList();
+      }
     },
     addNews() {
       console.log(this.newslistOne);
-      
-      this.postRequest("/home/news/addNewsList",this.newslistOne).then(resp=>{
-        if (resp && resp.data.state==1) {
-           this.$message({
+      this.postRequest("/home/news/addNewsList", this.newslistOne).then(
+        resp => {
+          if (resp && resp.data.state == 1) {
+            this.$message({
               message: resp.data.message,
               type: "success"
             });
-            this.dialogVisible=false;
+            this.dialogVisible = false;
+          }
         }
-      })
+      );
     },
 
     clearnNewsListStyle() {
@@ -234,10 +245,12 @@ export default {
         contentHtml: ""
       };
     },
+
     commentDialogClose() {
       //弹出框关闭后清空缓存数据
       this.commentData = null;
     },
+
     nextUp() {
       this.getComment();
     },
@@ -275,15 +288,13 @@ export default {
         }
       });
     },
-    //图片上传方法
+
     uploadSuccess(response) {
+      //图片上传方法
       if (response.state == 200) {
         this.newslistOne.newsIcon = response.message;
       }
     },
-    
-
-
 
     updateNewsList() {
       //更新
@@ -339,14 +350,17 @@ export default {
         }
       });
     },
+
     imgDel(pos) {},
 
     handleRemove(file, fileList) {
       console.log(file, fileList);
     },
+
     handlePictureCardPreview(file) {
       console.log(file.url);
     },
+
     handleClose(done) {
       this.$confirm("确认关闭？")
         .then(_ => {
@@ -367,8 +381,34 @@ export default {
       this.newslistOne = row;
       this.dialogVisible = true;
     },
+
     handleDelete(index, row) {
-      console.log(index, row);
+      //删除一个
+      this.doDelete(row.id);
+    },
+
+    handleDeleteMany() {
+      //删除多个
+      var ids = "";
+      this.multipleSelection.forEach(item => {
+        ids = ids + item.id + ",";
+      });
+      this.doDelete(ids);
+    },
+
+    doDelete(ids) {
+      var _this=this;
+      this.postRequest("/home/news/deleteNewsById", {
+        ids: ids
+      }).then(resp => {
+        if (resp && resp.status == 200) {
+          _this.$message({
+            message: "恭喜删除成功!",
+            type: "success"
+          });
+           _this.loadNewsList();
+        }
+      });
     },
     loadNewsListByKeyworlds() {
       if (this.keywords != null && this.keywords != "") {
@@ -377,6 +417,7 @@ export default {
       }
       this.loadNewsList();
     },
+
     loadNewsList() {
       //查询接口
       var _this = this;
