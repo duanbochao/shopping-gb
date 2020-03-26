@@ -13,6 +13,11 @@ export default  new Vuex.Store({
   mutations: {
     increment (state) {
       state.count++
+    },
+    login(state,user){
+      state.user=user;
+      window.localStorage.setItem("user",JSON.stringify(user))
+
     }
   }
 })

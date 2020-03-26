@@ -38,21 +38,23 @@ Vue.filter('dateFormat', function (value,pattern="YYYY-MM-DD HH:mm:ss") {
 
 //配置路由守卫
 router.beforeEach((to, from, next) => {
+
   if (to.name == "Login") {
     next();
     return;
   }
-
   var name = store.state.user.name;
-
+  console.log(name);
   
   if (name === '未登录') {
     if (to.meta.requireAuth || to.name == null) {
-      next();
+      next({path: '/', query: {redirect: to.path}})
     } else {
       next();
     }
   }else{
+    console.log("helllo");
+    
     next();
   }
 

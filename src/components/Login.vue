@@ -34,22 +34,16 @@ export default {
         username: _this.username,
         password: _this.password
       }).then(resp => {
-
         if (resp && resp.data.state == 1) {
           this.$message({
             message: "恭喜你，登录成功!",
             type: "success"
           });
-
-          window.localStorage.setItem("user",JSON.stringify(resp.data.message))
-          
-          this.$router.push({path:'/home'})
-          
-        }else{
-           this.$message.error('登录失败，请核实用户名或密码是否错误');
+          _this.$store.commit("login", resp.data.message);
+          _this.$router.push({ path: "/home" });
+        } else {
+          this.$message.error("登录失败，请核实用户名或密码是否错误");
         }
-
-
       });
     }
   }
