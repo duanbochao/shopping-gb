@@ -188,7 +188,7 @@ export default {
         type: ""
       },
       share: {
-        id: 0,
+        id: '',
         url: "",
         title: "",
         content: "",
@@ -303,10 +303,12 @@ export default {
     //添加操作
     addShare() {
       var _this = this;
-      this.postRequest("/home/share/addShare", this.share).then(resp => {
-        if (resp && resp.status == 200) {
+        console.log(this.share);
+        
+      this.postRequest((this.share.id==='' || this.share.id==='') ? "/home/share/addShare" : "/home/share/updateShare", this.share).then(resp => {
+        if (resp && resp.data.state == 200) {
           _this.$message({
-            message: "添加成功!",
+            message: resp.data.message,
             type: "success"
           });
           _this.loadList();
@@ -402,7 +404,7 @@ export default {
 
     formateShare() {
       this.share = {
-        id: 0,
+        id: '',
         url: "",
         title: "",
         content: "",
