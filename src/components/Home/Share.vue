@@ -180,7 +180,7 @@ export default {
       dialogVisible: false,
       imgDetails: [],
       detailsType: "",
-      dialogtype: 0,
+      dialogtype: '',
       imageContainer: "",
       shareImgDetails: {
         id: 0,

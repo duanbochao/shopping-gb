@@ -217,10 +217,13 @@ export default {
       }
     },
     addNews() {
-      console.log(this.newslistOne);
+      var _this=this;
+        this.newslistOne.contentHtml = this.$refs.md.d_render;
       this.postRequest("/home/news/addNewsList", this.newslistOne).then(
         resp => {
-          if (resp && resp.data.state == 1) {
+          console.log(resp);
+          
+          if (resp && resp.data.state == '1') {
             _this.$message({
               message: resp.data.message,
               type: "success"
@@ -308,6 +311,7 @@ export default {
 
       //获取编译器中的html信息
       this.newslistOne.contentHtml = this.$refs.md.d_render;
+
       this.postRequest("/home/news/updateNews", _this.newslistOne).then(
         resp => {
           if (resp.status == 200) {

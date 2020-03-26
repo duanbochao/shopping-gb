@@ -219,6 +219,7 @@ export default {
 
 .box-card {
   width: 340px;
+  margin: 5px 12px;
   height: 360px;
   box-shadow: 0 0 3px rgb(177, 67, 250);
   margin-top: 10px;
@@ -230,7 +231,7 @@ export default {
 }
 .car_box {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   flex-wrap: wrap;
 }
