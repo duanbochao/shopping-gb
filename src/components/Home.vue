@@ -1,5 +1,5 @@
 <template>
-  <el-container>
+  <el-container class="home-container">
     <el-header>
       <div class="header_box">
         <h3 style="color:white">购物商城后台管理系统</h3>
@@ -85,13 +85,13 @@ export default {
   background-color: #d3dce6;
 }
 .el-main {
-  background-color: #e9eef3;
+  background-color: #ffffff;
 }
 
-.el-container {
+.home-container{
   height: 100%;
   width: 100%;
-  position: relative;
+  position: absolute;
   left: 0px;
   bottom: 0px;
 }

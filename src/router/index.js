@@ -5,6 +5,8 @@ import Home from '@/components/Home'
 import News from '@/components/Home/News'
 import Share from '@/components/Home/Share'
 import Systemmanager from '@/components/System/Systemmanager'
+import PrivateMana from '@/components/System/PrivateMana'
+
 
 Vue.use(Router)
 
@@ -37,6 +39,11 @@ export default new Router({
             path:'/home/sysmanager',
             name:"操作管理员",
             component:Systemmanager
+          },
+          {
+            path:'/home/privatemana',
+            name:"权限组管理",
+            component:PrivateMana
           }
       ]
     }
