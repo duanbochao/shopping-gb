@@ -33,7 +33,7 @@
       <el-table-column align="right">
         <template slot="header">
           <div class="search">
-            <el-input v-model="keywords" size="mini" placeholder="请输入标题搜索" />
+            <el-input v-model="keywords" size="mini" placeholder="请输入标题搜索" @input="change($event)" />
             <el-button
               icon="el-icon-search"
               type="primary"
@@ -180,7 +180,7 @@ export default {
       index: 1,
       flag: true,
       currentPage: 1,
-      keywords: "",
+      keywords: '',
       size: 5,
       nid: -1,
       search: "",
@@ -205,6 +205,9 @@ export default {
     this.loadNewsList();
   },
   methods: {
+    change(e){
+     this.$forceUpdate();
+    },
     handleSelectionChange(val) {
       this.multipleSelection = val;
     },

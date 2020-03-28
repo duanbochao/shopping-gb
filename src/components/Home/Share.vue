@@ -35,7 +35,7 @@
     <!-- 表格区域 -->
     <el-table
       :data="shareList"
-      style="width: 100%;height:380px"
+      style="width: 100%;height:380%"
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55px"></el-table-column>
@@ -125,7 +125,7 @@
           <el-upload
             class="upload_demo"
             action="/config/uploadimg"
-            :limit="3"
+            :limit="9"
             :on-success="uploadSuccess"
             :on-error="uploadError"
             :show-file-list="false"
@@ -327,7 +327,7 @@ export default {
         this.postRequest("/home/share/addShareSubImageToDetail", {
           surl: response.message,
           sid: _this.shareId,
-          type: _this.dialogtype + ""
+          type: _this.detailsType + ""
         })
           .then(resp => {
             if (resp && resp.status === 200) {
@@ -337,7 +337,7 @@ export default {
               });
               _this.imageContainer = resp.data.message;
               _this.imgDetails.push(resp.data.message);
-              console.log(" _this.imgDetails======", _this.imgDetails);
+              console.log(" _this.imgDetails======", _this.imgDetails); 
             }
           })
           .catch(resp => {});

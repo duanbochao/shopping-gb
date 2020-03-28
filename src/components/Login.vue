@@ -30,7 +30,7 @@ export default {
   methods: {
     doLogin() {
       var _this = this;
-      this.postRequest("/login", {
+      this.postRequest("/home/login", {
         username: _this.username,
         password: _this.password
       }).then(resp => {

@@ -67,7 +67,7 @@ export default {
       }).then(resp => {
         if (resp && resp.status == 200) {
           _this.$message({
-            message: resp.data.message,
+            message: "恭喜添加成功!",
             type: "success"
           });
           _this.getAllRoles();
